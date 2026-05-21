@@ -1,172 +1,147 @@
-local L0_1, L1_1, L2_1, L3_1, L4_1, L5_1, L6_1, L7_1
-L0_1 = "move_ped_wpn_jerrycan_generic"
-L1_1 = Config
-L1_1 = L1_1.Mode
-L1_1 = "always" == L1_1
-L2_1 = false
-function L3_1(A0_2)
-  local L1_2, L2_2, L3_2, L4_2, L5_2, L6_2, L7_2, L8_2, L9_2
-  L1_2 = Config
-  L1_2 = L1_2.WeaponCheckMode
-  if "all" == L1_2 then
-    L1_2 = GetSelectedPedWeapon
-    L2_2 = A0_2
-    L1_2 = L1_2(L2_2)
-    L2_2 = GetHashKey
-    L3_2 = "WEAPON_UNARMED"
-    L2_2 = L2_2(L3_2)
-    if L1_2 == L2_2 then
-      L1_2 = false
-      return L1_2
-    end
-    L1_2 = true
-    return L1_2
-  else
-    L1_2 = GetSelectedPedWeapon
-    L2_2 = A0_2
-    L1_2 = L1_2(L2_2)
-    L2_2 = ipairs
-    L3_2 = Config
-    L3_2 = L3_2.SupportedWeapons
-    L2_2, L3_2, L4_2, L5_2 = L2_2(L3_2)
-    for L6_2, L7_2 in L2_2, L3_2, L4_2, L5_2 do
-      L8_2 = GetHashKey
-      L9_2 = L7_2
-      L8_2 = L8_2(L9_2)
-      if L1_2 == L8_2 then
-        L8_2 = true
-        return L8_2
-      end
-    end
-    L2_2 = false
-    return L2_2
-  end
-end
-ShouldApplyAnimation = L3_1
-L3_1 = Config
-L3_1 = L3_1.Mode
-if "keybind" == L3_1 then
-  L3_1 = RegisterCommand
-  L4_1 = "toggleOneHandedWeapon"
-  function L5_1()
-    local L0_2, L1_2, L2_2, L3_2, L4_2
-    L0_2 = L1_1
-    L0_2 = not L0_2
-    L1_1 = L0_2
-    L0_2 = BeginTextCommandThefeedPost
-    L1_2 = "STRING"
-    L0_2(L1_2)
-    L0_2 = AddTextComponentSubstringPlayerName
-    L1_2 = "One-handed weapon holding "
-    L2_2 = L1_1
-    if L2_2 then
-      L2_2 = "enabled"
-      if L2_2 then
-        goto lbl_16
-      end
-    end
-    L2_2 = "disabled"
-    ::lbl_16::
-    L1_2 = L1_2 .. L2_2
-    L0_2(L1_2)
-    L0_2 = EndTextCommandThefeedPostTicker
-    L1_2 = true
-    L2_2 = false
-    L0_2(L1_2, L2_2)
-    L0_2 = PlayerPedId
-    L0_2 = L0_2()
-    L1_2 = L1_1
-    if L1_2 then
-      L1_2 = ShouldApplyAnimation
-      L2_2 = L0_2
-      L1_2 = L1_2(L2_2)
-      if L1_2 then
-        L1_2 = SetPedWeaponMovementClipset
-        L2_2 = L0_2
-        L3_2 = L0_1
-        L4_2 = 0.5
-        L1_2(L2_2, L3_2, L4_2)
-      end
-    else
-      L1_2 = ResetPedWeaponMovementClipset
-      L2_2 = L0_2
-      L3_2 = 0.0
-      L1_2(L2_2, L3_2)
-    end
-  end
-  L3_1(L4_1, L5_1)
-  L3_1 = RegisterKeyMapping
-  L4_1 = "toggleOneHandedWeapon"
-  L5_1 = "Toggle One-Handed Weapon Holding"
-  L6_1 = "keyboard"
-  L7_1 = Config
-  L7_1 = L7_1.ToggleKey
-  L3_1(L4_1, L5_1, L6_1, L7_1)
-end
-L3_1 = Citizen
-L3_1 = L3_1.CreateThread
-function L4_1()
-  local L0_2, L1_2, L2_2, L3_2, L4_2, L5_2, L6_2
-  while true do
-    L0_2 = PlayerPedId
-    L0_2 = L0_2()
-    L1_2 = L1_1
-    if L1_2 then
-      L1_2 = ShouldApplyAnimation
-      L2_2 = L0_2
-      L1_2 = L1_2(L2_2)
-      if L1_2 then
-        L1_2 = L2_1
-        if not L1_2 then
-          L1_2 = GiveWeaponToPed
-          L2_2 = L0_2
-          L3_2 = GetHashKey
-          L4_2 = "weapon_petrolcan"
-          L3_2 = L3_2(L4_2)
-          L4_2 = 0
-          L5_2 = false
-          L6_2 = true
-          L1_2(L2_2, L3_2, L4_2, L5_2, L6_2)
-          L1_2 = RemoveWeaponFromPed
-          L2_2 = L0_2
-          L3_2 = GetHashKey
-          L4_2 = "weapon_petrolcan"
-          L3_2, L4_2, L5_2, L6_2 = L3_2(L4_2)
-          L1_2(L2_2, L3_2, L4_2, L5_2, L6_2)
-          L1_2 = true
-          L2_1 = L1_2
+local CLIPSET      = "move_ped_wpn_jerrycan_generic"
+local isEnabled    = Config.Mode == "always"
+local clipsetLoaded = false
+local lastToggle   = 0
+
+local hasOxLib = GetResourceState('ox_lib') == 'started'
+
+-- Blocks until the local player's ped is fully spawned and alive.
+-- This is the root cause of the "sometimes works on load" bug: the thread
+-- was reaching EnsureClipsetLoaded before the ped entity existed.
+local function WaitForPed()
+    while true do
+        local ped = PlayerPedId()
+        if DoesEntityExist(ped) and not IsEntityDead(ped) and ped ~= 0 then
+            return ped
         end
-        L1_2 = SetPedWeaponMovementClipset
-        L2_2 = L0_2
-        L3_2 = L0_1
-        L4_2 = 0.5
-        L1_2(L2_2, L3_2, L4_2)
-        L1_2 = Citizen
-        L1_2 = L1_2.Wait
-        L2_2 = 250
-        L1_2(L2_2)
-      else
-        L1_2 = ResetPedWeaponMovementClipset
-        L2_2 = L0_2
-        L3_2 = 0.0
-        L1_2(L2_2, L3_2)
-        L1_2 = Citizen
-        L1_2 = L1_2.Wait
-        L2_2 = 500
-        L1_2(L2_2)
-      end
-    else
-      L1_2 = ResetPedWeaponMovementClipset
-      L2_2 = L0_2
-      L3_2 = 0.0
-      L1_2(L2_2, L3_2)
-      L1_2 = false
-      L2_1 = L1_2
-      L1_2 = Citizen
-      L1_2 = L1_2.Wait
-      L2_2 = 1000
-      L1_2(L2_2)
+        Citizen.Wait(500)
     end
-  end
 end
-L3_1(L4_1)
+
+local function ShowNotification(status)
+    local message = "One-handed weapon holding " .. status
+
+    if Config.UseOxLib and hasOxLib then
+        local isOn = status == "enabled"
+        lib.notify({
+            title       = 'One-Hand Weapons',
+            description = message,
+            type        = isOn and 'success' or 'error',
+            position    = Config.OxLibNotify.position,
+            duration    = Config.OxLibNotify.duration,
+            icon        = Config.OxLibNotify.icon,
+            iconColor   = isOn and '#4CAF50' or '#f44336',
+        })
+    else
+        BeginTextCommandThefeedPost("STRING")
+        AddTextComponentSubstringPlayerName(message)
+        EndTextCommandThefeedPostTicker(true, false)
+    end
+end
+
+-- Returns true if the ped's currently selected weapon should receive the animation.
+function ShouldApplyAnimation(ped)
+    local weapon = GetSelectedPedWeapon(ped)
+
+    if Config.WeaponCheckMode == "all" then
+        return weapon ~= GetHashKey("WEAPON_UNARMED")
+    end
+
+    for _, weaponName in ipairs(Config.SupportedWeapons) do
+        if weapon == GetHashKey(weaponName) then
+            return true
+        end
+    end
+    return false
+end
+
+-- Forces GTA to stream the jerrycan movement clipset by briefly registering
+-- the petrol can weapon (which shares the same clipset) then removing it.
+local function EnsureClipsetLoaded(ped)
+    if clipsetLoaded then return end
+    GiveWeaponToPed(ped, GetHashKey("weapon_petrolcan"), 0, false, true)
+    RemoveWeaponFromPed(ped, GetHashKey("weapon_petrolcan"))
+    clipsetLoaded = true
+end
+
+local function ApplyClipset(ped)
+    EnsureClipsetLoaded(ped)
+    SetPedWeaponMovementClipset(ped, CLIPSET, 0.5)
+end
+
+local function RemoveClipset(ped)
+    ResetPedWeaponMovementClipset(ped, 0.0)
+end
+
+local function OnToggle()
+    local now = GetGameTimer()
+    if (now - lastToggle) < Config.ToggleCooldown then return end
+    lastToggle = now
+
+    isEnabled = not isEnabled
+    local status = isEnabled and "enabled" or "disabled"
+    ShowNotification(status)
+
+    local ped = PlayerPedId()
+    if isEnabled then
+        if ShouldApplyAnimation(ped) then
+            ApplyClipset(ped)
+        end
+    else
+        clipsetLoaded = false
+        RemoveClipset(ped)
+    end
+
+    TriggerServerEvent("onehand:toggleState", isEnabled)
+end
+
+if Config.Mode == "keybind" then
+    RegisterCommand("toggleOneHandedWeapon", OnToggle)
+    RegisterKeyMapping("toggleOneHandedWeapon", "Toggle One-Handed Weapon Holding", "keyboard", Config.ToggleKey)
+end
+
+-- Server can force-disable the animation for this client (e.g. admin override).
+AddEventHandler("onehand:forceDisable", function()
+    if isEnabled then
+        isEnabled = false
+        clipsetLoaded = false
+        RemoveClipset(PlayerPedId())
+        ShowNotification("disabled")
+    end
+end)
+
+-- Server can force-enable the animation for this client.
+AddEventHandler("onehand:forceEnable", function()
+    if not isEnabled then
+        isEnabled = true
+        local ped = PlayerPedId()
+        if ShouldApplyAnimation(ped) then
+            ApplyClipset(ped)
+        end
+        ShowNotification("enabled")
+    end
+end)
+
+Citizen.CreateThread(function()
+    -- Wait for the ped to be ready before doing anything, so the clipset
+    -- trick and animation apply against a valid entity from the first tick.
+    WaitForPed()
+
+    while true do
+        local ped = PlayerPedId()
+
+        if isEnabled then
+            if ShouldApplyAnimation(ped) then
+                ApplyClipset(ped)
+                Citizen.Wait(250)
+            else
+                RemoveClipset(ped)
+                Citizen.Wait(500)
+            end
+        else
+            RemoveClipset(ped)
+            clipsetLoaded = false
+            Citizen.Wait(1000)
+        end
+    end
+end)
