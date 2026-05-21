@@ -8,8 +8,23 @@ Config.Mode = 'keybind'
 -- 'all': Applies the animation to ANY held weapon (except unarmed).
 Config.WeaponCheckMode = 'all'
 
--- Key used to toggle the one-handed animation (only used if Config.Mode is 'keybind' - players can change keybind in settings).
+-- Key used to toggle the one-handed animation (only used if Config.Mode is 'keybind').
+-- Players can also rebind this in their GTA settings menu.
 Config.ToggleKey = "M"
+
+-- Minimum milliseconds a player must wait between toggle presses.
+Config.ToggleCooldown = 2000
+
+-- Set to true to use ox_lib styled notifications instead of the default GTA feed notification.
+-- Requires ox_lib to be started on your server (https://github.com/overextended/ox_lib).
+Config.UseOxLib = false
+
+-- ox_lib notification options (only used when Config.UseOxLib = true).
+Config.OxLibNotify = {
+    position    = 'top-right',  -- 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
+    duration    = 4000,         -- display time in ms
+    icon        = 'gun',        -- Font Awesome icon name
+}
 
 -- Supported weapons list (WORKS WITH CUSTOM WEAPONS!)
 Config.SupportedWeapons = {

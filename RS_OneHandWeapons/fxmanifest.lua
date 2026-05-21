@@ -18,3 +18,8 @@ escrow_ignore {
 }
 
 dependency '/assetpacks'
+
+-- ox_lib is optional; only required when Config.UseOxLib = true
+optional_dependencies {
+    'ox_lib'
+}
